@@ -38,7 +38,7 @@ var Option = React.createClass({
 					onMouseDown: this.blockEvent,
 					onClick: this.props.onRemove,
 					onTouchEnd: this.props.onRemove },
-				'×'
+				String.fromCharCode(215)
 			),
 			React.createElement(
 				'span',
@@ -108,7 +108,7 @@ var Select = React.createClass({
 	getDefaultProps: function getDefaultProps() {
 		return {
 			value: undefined,
-			options: [],
+			options: undefined,
 			disabled: false,
 			delimiter: ',',
 			asyncOptions: undefined,
@@ -459,10 +459,14 @@ var Select = React.createClass({
 	},
 
 	autoloadAsyncOptions: function autoloadAsyncOptions() {
-		this.loadAsyncOptions('', {}, function () {});
+		var self = this;
+		this.loadAsyncOptions('', {}, function () {
+			// update with fetched
+			self.setValue(self.props.value);
+		});
 	},
 
-	loadAsyncOptions: function loadAsyncOptions(input, state) {
+	loadAsyncOptions: function loadAsyncOptions(input, state, callback) {
 		var thisRequestId = this._currentRequestId = requestId++;
 
 		for (var i = 0; i <= input.length; i++) {
@@ -476,6 +480,7 @@ var Select = React.createClass({
 					filteredOptions: filteredOptions,
 					focusedOption: _.contains(filteredOptions, this.state.focusedOption) ? this.state.focusedOption : filteredOptions[0]
 				}, state));
+				if (callback) callback({});
 				return;
 			}
 		}
@@ -496,6 +501,8 @@ var Select = React.createClass({
 				filteredOptions: filteredOptions,
 				focusedOption: _.contains(filteredOptions, this.state.focusedOption) ? this.state.focusedOption : filteredOptions[0]
 			}, state));
+
+			if (callback) callback({});
 		}).bind(this));
 	},
 
@@ -671,7 +678,11 @@ var Select = React.createClass({
 		}
 
 		var loading = this.state.isLoading ? React.createElement('span', { className: 'Select-loading', 'aria-hidden': 'true' }) : null;
-		var clear = this.props.clearable && this.state.value && !this.props.disabled ? React.createElement('span', { className: 'Select-clear', title: this.props.multi ? this.props.clearAllText : this.props.clearValueText, 'aria-label': this.props.multi ? this.props.clearAllText : this.props.clearValueText, onMouseDown: this.clearValue, onClick: this.clearValue, dangerouslySetInnerHTML: { __html: '&times;' } }) : null;
+		var clear = this.props.clearable && this.state.value && !this.props.disabled ? React.createElement(
+			'span',
+			{ className: 'Select-clear', title: this.props.multi ? this.props.clearAllText : this.props.clearValueText, 'aria-label': this.props.multi ? this.props.clearAllText : this.props.clearValueText, onMouseDown: this.clearValue, onClick: this.clearValue },
+			String.fromCharCode(215)
+		) : null;
 
 		var menu;
 		var menuProps;
